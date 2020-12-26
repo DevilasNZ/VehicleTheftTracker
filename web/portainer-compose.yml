@@ -1,0 +1,14 @@
+version: "2"
+services:
+  node:
+    container_name: "Vehicle_Theft_Tracker_NodeJS"
+    image: "node:latest"
+    user: "node"
+    working_dir: /code
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /dockerdata/cifs/VehicleTheftTracker/web:/code
+    ports:
+      - "3002:3000"
+    command: bash -c "npm start"

@@ -1,0 +1,741 @@
+<!doctype html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- highcharts libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.6/proj4.js"></script>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/nz/nz-all.js"></script>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Vehicle Theft Tracker</title>
+</head>
+<style>
+
+    .player-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .add-player-form {
+        margin-top: 50px;
+    }
+    a:link {
+      text-decoration: none ;
+    }
+
+    /* Style the tab */
+    .tab {
+     overflow: hidden;
+     border: 1px solid #ccc;
+     background-color: #f1f1f1;
+    }
+
+    /* Style the buttons that are used to open the tab content */
+    .tab button {
+     background-color: inherit;
+     float: left;
+     border: none;
+     outline: none;
+     cursor: pointer;
+     padding: 14px 16px;
+     transition: 0.3s;
+    }
+
+    /* Change background color of buttons on hover */
+    .tab button:hover {
+     background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .tab button.active {
+     background-color: #ccc;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+     display: none;
+     padding: 6px 12px;
+     border: 1px solid #ccc;
+     border-top: none;
+    }
+
+    .monthtabcontent {
+     display: none;
+     padding: 6px 12px;
+     border: 1px solid #ccc;
+     border-top: none;
+    }
+
+    .alltimetabcontent {
+     display: none;
+     padding: 6px 12px;
+     border: 1px solid #ccc;
+     border-top: none;
+    }
+
+    .tableset{
+      width: 50%;
+      height: 400px;
+      float: left;
+    }
+
+    .tableset td{
+      font-size: 12px;
+      padding: 6px;
+    }
+
+    .mapcontainer{
+      margin-left: 52%;
+      width: 48%;
+      height: 400px;
+    }
+</style>
+
+<body>
+  <div class="page-wrapper">
+      <nav class="navbar navbar-light bg-light">
+          <span><h3><a href="/"><img src="/logo.png" height="40px"/>New Zealand Vehicle Theft Statistics</a></h3></span>
+          <p class="float-right">V 0.89</p>
+      </nav>
+
+    <div class="tab">
+      <button class="timetablinks" onclick="openTimePeriod(event, 'week-data')" id="timeDefaultOpen">Last Week</button>
+      <button class="timetablinks" onclick="openTimePeriod(event, 'month-data')">Last Month</button>
+      <button class="timetablinks" onclick="openTimePeriod(event, 'all-time-data')">All Time</button>
+    </div>
+
+    <div id="week-data" class="timeperiod">
+      <div id="dataset">
+        <div class="tab">
+          <button class="tablinks" onclick="openWeekTab(event, 'make-model-count')" id="weekDefaultOpen">Model</button>
+          <button class="tablinks" onclick="openWeekTab(event, 'make-count')">Make</button>
+          <button class="tablinks" onclick="openWeekTab(event, 'type-count')">Type of Vehicle</button>
+        </div>
+        <div id="week-tables" class="tableset">
+          <div id="make-model-count" class="tabcontent">
+            <div class="table-wrapper">
+              <table class="table table-hovered">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th scope="col">Make</th>
+                          <th scope="col">Model</th>
+                          <th scope="col">Count</th>
+                      </tr>
+                  </thead>
+                  <tbody id = last-week-make-model-count-table>
+                  </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="make-count" class="tabcontent">
+            <div class="table-wrapper">
+              <table class="table table-hovered">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th scope="col">Make</th>
+                          <th scope="col">Count</th>
+                      </tr>
+                  </thead>
+                  <tbody id = last-week-make-count-table>
+                  </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="type-count" class="tabcontent">
+            <div class="table-wrapper">
+              <table class="table table-hovered">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th scope="col">Type of Vehicle</th>
+                          <th scope="col">Count</th>
+                      </tr>
+                  </thead>
+                  <tbody id = last-week-type-count-table>
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="week-map-container" class="mapcontainer"></div>
+      </div>
+    </div>
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+
+  <div id="month-data" class="timeperiod">
+    <div id="dataset">
+      <div class="tab">
+        <button class="monthtablinks" onclick="openMonthTab(event, 'month-make-model-count')" id="MonthDefaultOpen">Model</button>
+        <button class="monthtablinks" onclick="openMonthTab(event, 'month-make-count')">Make</button>
+        <button class="monthtablinks" onclick="openMonthTab(event, 'month-type-count')">Type of Vehicle</button>
+      </div>
+      <div id="month-tables" class="tableset">
+        <div id="month-make-model-count" class="monthtabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Make</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = last-month-make-model-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="month-make-count" class="monthtabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Make</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = last-month-make-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="month-type-count" class="monthtabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Type of Vehicle</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = last-month-type-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="month-map-container" class="mapcontainer"></div>
+    </div>
+  </div>
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+  <div id="all-time-data" class="timeperiod">
+    <div id="dataset">
+      <div class="tab">
+        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-make-model-count')" id="AllTimeDefaultOpen">Model</button>
+        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-make-count')">Make</button>
+        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-type-count')">Type of Vehicle</button>
+      </div>
+      <div id="all-time-tables" class="tableset">
+        <div id="all-time-make-model-count" class="alltimetabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Make</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = all-time-make-model-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="all-time-make-count" class="alltimetabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Make</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = all-time-make-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="all-time-type-count" class="alltimetabcontent">
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Type of Vehicle</th>
+                        <th scope="col">Count</th>
+                    </tr>
+                </thead>
+                <tbody id = all-time-type-count-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="all-time-map-container" class="mapcontainer"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Get the element with id="defaultOpen" and click on it
+  document.getElementById("timeDefaultOpen").click();
+  document.getElementById("weekDefaultOpen").click();
+  document.getElementById("MonthDefaultOpen").click();
+  document.getElementById("AllTimeDefaultOpen").click();
+
+  function openTimePeriod(evt, contentName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("timeperiod");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("timetablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(contentName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  //------------------------------------------------------------------------------------------------
+
+  function openWeekTab(evt, contentName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(contentName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  //------------------------------------------------------------------------------------------------
+
+  function openMonthTab(evt, contentName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("monthtabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("monthtablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(contentName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  //------------------------------------------------------------------------------------------------
+
+  function openAllTimeTab(evt, contentName) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("alltimetabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("alltimetablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(contentName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+</script>
+
+<!-- put the JSON data into the html tables -->
+<script>
+	var myArray = []
+
+  $.getJSON('/last-week-make-model-count.json', function(data){
+    buildMakeModelTable(data,'last-week-make-model-count-table')
+  });
+  $.getJSON('/last-week-make-count.json', function(data){
+    buildMakeTable(data,'last-week-make-count-table')
+  });
+  $.getJSON('/last-week-type-count.json', function(data){
+    buildTypeTable(data,'last-week-type-count-table')
+  });
+
+  $.getJSON('/last-month-make-model-count.json', function(data){
+    buildMakeModelTable(data,'last-month-make-model-count-table')
+  });
+  $.getJSON('/last-month-make-count.json', function(data){
+    buildMakeTable(data,'last-month-make-count-table')
+  });
+  $.getJSON('/last-month-type-count.json', function(data){
+    buildTypeTable(data,'last-month-type-count-table')
+  });
+
+  $.getJSON('/all-time-make-model-count.json', function(data){
+    buildMakeModelTable(data,'all-time-make-model-count-table')
+  });
+  $.getJSON('/all-time-make-count.json', function(data){
+    buildMakeTable(data,'all-time-make-count-table')
+  });
+  $.getJSON('/all-time-type-count.json', function(data){
+    buildTypeTable(data,'all-time-type-count-table')
+  });
+
+	function buildMakeModelTable(data,tableID){
+		var table = document.getElementById(tableID)
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].make}</td>
+							<td>${data[i].model}</td>
+							<td>${data[i].magnitude}</td>
+					  </tr>`
+			table.innerHTML += row
+		}
+	}
+
+  function buildMakeTable(data,tableID){
+		var table = document.getElementById(tableID)
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].make}</td>
+							<td>${data[i].magnitude}</td>
+					  </tr>`
+			table.innerHTML += row
+		}
+	}
+
+  function buildTypeTable(data,tableID){
+		var table = document.getElementById(tableID)
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].type}</td>
+							<td>${data[i].magnitude}</td>
+					  </tr>`
+			table.innerHTML += row
+		}
+	}
+
+</script>
+
+<!-- ---------------------------------------------------------------------------------------- -->
+
+<script>
+var H = Highcharts,
+    map = H.maps['countries/nz/nz-all'],
+    chart;
+
+// Grab the location data and generate the map.
+Highcharts.getJSON('/last-week-location-count.json', function (json) {
+    var data = [];
+    json.forEach(function (p) {
+        //set latitude and longitude of the data based on the location attribute.
+        switch(p.location){
+          case "Auckland City":
+            p.lat=-36.848461;
+            p.lon=174.763336;
+            break;
+          case "Bay of Plenty":
+            p.lat=-37.683334;
+            p.lon=176.566672;
+            break;
+          case "Central":
+            p.lat=-39.4788027;
+            p.lon=175.0330237;
+            break;
+          case "Canterbury":
+            p.lat=-43.525650;
+            p.lon=172.639847;
+            break;
+          case "Counties/Manukau":
+            p.lat=-37.20213;
+            p.lon=174.903513;
+            break;
+          case "Eastern":
+            p.lat=-39.06264678;
+            p.lon=177.03978310;
+            break;
+          case "Northland":
+            p.lat=-35.4000;
+            p.lon=173.8000;
+            break;
+          case "Southern":
+            p.lat=-45.6465045;
+            p.lon=168.5113075;
+            break;
+          case "Tasman":
+            p.lat=-41.4351669;
+            p.lon=172.3557036;
+            break;
+          case "Waikato":
+            p.lat=-37.78333;
+            p.lon=175.28333;
+            break;
+          case "Waitemata":
+            p.lat=-36.8299;
+            p.lon=174.7378;
+            break;
+          case "Wellington":
+            p.lat=-41.276825;
+            p.lon=174.777969;
+            break;
+          default:
+            p.lat=-44.6210017;
+            p.lon=178.9078565;
+            break;
+        }
+
+        p.z = p.magnitude;
+        data.push(p);
+    });
+
+    chart = Highcharts.mapChart('week-map-container', {
+        title: {
+            text: ''
+        },
+
+        tooltip: {
+            pointFormat: '{point.location}<br>' +
+                'Count: {point.magnitude}'
+        },
+
+        series: [{
+            name: 'Basemap',
+            mapData: map,
+            borderColor: '#606060',
+            nullColor: 'rgba(200, 200, 200, 0.2)',
+            showInLegend: false
+        }, {
+            type: 'mapbubble',
+            name: 'Cities',
+            data: data,
+            maxSize: '12%',
+            color: H.getOptions().colors[0]
+        }]
+    });
+});
+
+Highcharts.getJSON('/last-month-location-count.json', function (json) {
+    var data = [];
+    json.forEach(function (p) {
+        //set latitude and longitude of the data based on the location attribute.
+        switch(p.location){
+          case "Auckland City":
+            p.lat=-36.848461;
+            p.lon=174.763336;
+            break;
+          case "Bay of Plenty":
+            p.lat=-37.683334;
+            p.lon=176.566672;
+            break;
+          case "Central":
+            p.lat=-39.4788027;
+            p.lon=175.0330237;
+            break;
+          case "Canterbury":
+            p.lat=-43.525650;
+            p.lon=172.639847;
+            break;
+          case "Counties/Manukau":
+            p.lat=-37.20213;
+            p.lon=174.903513;
+            break;
+          case "Eastern":
+            p.lat=-39.06264678;
+            p.lon=177.03978310;
+            break;
+          case "Northland":
+            p.lat=-35.4000;
+            p.lon=173.8000;
+            break;
+          case "Southern":
+            p.lat=-45.6465045;
+            p.lon=168.5113075;
+            break;
+          case "Tasman":
+            p.lat=-41.4351669;
+            p.lon=172.3557036;
+            break;
+          case "Waikato":
+            p.lat=-37.78333;
+            p.lon=175.28333;
+            break;
+          case "Waitemata":
+            p.lat=-36.8299;
+            p.lon=174.7378;
+            break;
+          case "Wellington":
+            p.lat=-41.276825;
+            p.lon=174.777969;
+            break;
+          default:
+            p.lat=-44.6210017;
+            p.lon=178.9078565;
+            break;
+        }
+
+        p.z = p.magnitude;
+        data.push(p);
+    });
+
+    chart = Highcharts.mapChart('month-map-container', {
+        title: {
+            text: ''
+        },
+
+        tooltip: {
+            pointFormat: '{point.location}<br>' +
+                'Count: {point.magnitude}'
+        },
+
+        series: [{
+            name: 'Basemap',
+            mapData: map,
+            borderColor: '#606060',
+            nullColor: 'rgba(200, 200, 200, 0.2)',
+            showInLegend: false
+        }, {
+            type: 'mapbubble',
+            name: 'Cities',
+            data: data,
+            maxSize: '12%',
+            color: H.getOptions().colors[0]
+        }]
+    });
+});
+
+Highcharts.getJSON('/all-time-location-count.json', function (json) {
+    var data = [];
+    json.forEach(function (p) {
+        //set latitude and longitude of the data based on the location attribute.
+        switch(p.location){
+          case "Auckland City":
+            p.lat=-36.848461;
+            p.lon=174.763336;
+            break;
+          case "Bay of Plenty":
+            p.lat=-37.683334;
+            p.lon=176.566672;
+            break;
+          case "Central":
+            p.lat=-39.4788027;
+            p.lon=175.0330237;
+            break;
+          case "Canterbury":
+            p.lat=-43.525650;
+            p.lon=172.639847;
+            break;
+          case "Counties/Manukau":
+            p.lat=-37.20213;
+            p.lon=174.903513;
+            break;
+          case "Eastern":
+            p.lat=-39.06264678;
+            p.lon=177.03978310;
+            break;
+          case "Northland":
+            p.lat=-35.4000;
+            p.lon=173.8000;
+            break;
+          case "Southern":
+            p.lat=-45.6465045;
+            p.lon=168.5113075;
+            break;
+          case "Tasman":
+            p.lat=-41.4351669;
+            p.lon=172.3557036;
+            break;
+          case "Waikato":
+            p.lat=-37.78333;
+            p.lon=175.28333;
+            break;
+          case "Waitemata":
+            p.lat=-36.8299;
+            p.lon=174.7378;
+            break;
+          case "Wellington":
+            p.lat=-41.276825;
+            p.lon=174.777969;
+            break;
+          default:
+            p.lat=-44.6210017;
+            p.lon=178.9078565;
+            break;
+        }
+
+        p.z = p.magnitude;
+        data.push(p);
+    });
+
+    chart = Highcharts.mapChart('all-time-map-container', {
+        title: {
+            text: ''
+        },
+
+        tooltip: {
+            pointFormat: '{point.location}<br>' +
+                'Count: {point.magnitude}'
+        },
+
+        series: [{
+            name: 'Basemap',
+            mapData: map,
+            borderColor: '#606060',
+            nullColor: 'rgba(200, 200, 200, 0.2)',
+            showInLegend: false
+        }, {
+            type: 'mapbubble',
+            name: 'Cities',
+            data: data,
+            maxSize: '12%',
+            color: H.getOptions().colors[0]
+        }]
+    });
+});
+
+</script>
+
+</body>
+</html>
