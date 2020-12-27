@@ -235,6 +235,23 @@ app.get('/all-time-location-count.json', (req, res) => {
   });
 });
 
+//GET JSON data of the last 1000 stolen vehicles.
+app.get('/last-1000.json', (req, res) => {
+  let query = "SELECT * FROM Vehicle_Theft_Tracker.vehicles ORDER BY date desc LIMIT 1000;"
+
+  // execute query
+  con.query(query, (err, result) => {
+      if (err) {
+        console.log("there was an issue with querying the database for a term.")
+        console.log(err.message)
+        res.redirect('/');
+        return;
+      }
+      res.send(result)
+      return;
+  });
+});
+
 //------------------------------------------------------------------------------
 
 app.listen(3000, () => console.log('listening on port 3002'))

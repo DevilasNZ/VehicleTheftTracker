@@ -111,6 +111,7 @@
       <button class="timetablinks" onclick="openTimePeriod(event, 'week-data')" id="timeDefaultOpen">Last Week</button>
       <button class="timetablinks" onclick="openTimePeriod(event, 'month-data')">Last Month</button>
       <button class="timetablinks" onclick="openTimePeriod(event, 'all-time-data')">All Time</button>
+      <button class="timetablinks" onclick="openTimePeriod(event, 'search-data')">Search</button>
     </div>
 
 <!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -287,6 +288,32 @@
       <div id="all-time-map-container" class="mapcontainer"></div>
     </div>
   </div>
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
+  <div id="search-data" class="timeperiod">
+        <div id="dataset">
+          <div class="tab">
+            <input type="text" id="data-search-input" onkeyup="searchData()" placeholder="Search for names..">
+          </div>
+
+          <div class="table-wrapper">
+            <table class="table table-hovered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Reg.</th>
+                        <th scope="col">Make</th>
+                        <th scope="col">Model</th>
+                        <th scope="col">Year</th>
+                        <th scope="col">Colour</th>
+                        <th scope="col">Theft Date</th>
+                        <th scope="col">Region</th>
+                    </tr>
+                </thead>
+                <tbody id = data-search-table>
+                </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 </div>
 
 <script>
@@ -385,6 +412,10 @@
     buildTypeTable(data,'all-time-type-count-table')
   });
 
+  $.getJSON('/last-1000.json', function(data){
+    buildDataSearchTable(data,'data-search-table')
+  });
+
 	function buildMakeModelTable(data,tableID){
 		var table = document.getElementById(tableID)
 
@@ -422,6 +453,23 @@
 		}
 	}
 
+  function buildDataSearchTable(data,tableID){
+		var table = document.getElementById(tableID)
+
+		for (var i = 0; i < data.length; i++){
+			var row = `<tr>
+							<td>${data[i].rego}</td>
+							<td>${data[i].make}</td>
+              <td>${data[i].model}</td>
+							<td>${data[i].year}</td>
+              <td>${data[i].colour}</td>
+							<td>${data[i].date}</td>
+              <td>${data[i].location}</td>
+					  </tr>`
+			table.innerHTML += row
+		}
+	}
+
 </script>
 
 <!-- ---------------------------------------------------------------------------------------- -->
@@ -430,7 +478,7 @@
   var H = Highcharts,
       map = H.maps['countries/nz/nz-all'],
       chart;
-  
+
   function generateMapChart(json_directory, map_container){
     // Grab the location data and generate the map.
     Highcharts.getJSON(json_directory, function (json) {
@@ -527,6 +575,30 @@
   generateMapChart('/last-month-location-count.json','month-map-container');
   generateMapChart('/all-time-location-count.json','all-time-map-container');
 
+</script>
+
+<script>
+function searchData() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("data-search-input");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("data-search-table");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
 </script>
 
 </body>
