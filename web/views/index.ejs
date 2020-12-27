@@ -104,7 +104,7 @@
   <div class="page-wrapper">
       <nav class="navbar navbar-light bg-light">
           <span><h3><a href="/"><img src="/logo.png" height="40px"/>New Zealand Vehicle Theft Statistics</a></h3></span>
-          <p class="float-right">V 0.89</p>
+          <p class="float-right">V 0.90</p>
       </nav>
 
     <div class="tab">
@@ -113,15 +113,16 @@
       <button class="timetablinks" onclick="openTimePeriod(event, 'all-time-data')">All Time</button>
     </div>
 
+<!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
     <div id="week-data" class="timeperiod">
       <div id="dataset">
         <div class="tab">
-          <button class="tablinks" onclick="openWeekTab(event, 'make-model-count')" id="weekDefaultOpen">Model</button>
-          <button class="tablinks" onclick="openWeekTab(event, 'make-count')">Make</button>
-          <button class="tablinks" onclick="openWeekTab(event, 'type-count')">Type of Vehicle</button>
+          <button class="tablinks make-model-count-link" onclick="openDataTab(event, 'make-model-count')" id="weekDefaultOpen">Model</button>
+          <button class="tablinks make-count-link" onclick="openDataTab(event, 'make-count')">Make</button>
+          <button class="tablinks type-count-link" onclick="openDataTab(event, 'type-count')">Type of Vehicle</button>
         </div>
         <div id="week-tables" class="tableset">
-          <div id="make-model-count" class="tabcontent">
+          <div id="make-model-count" class="tabcontent make-model-count">
             <div class="table-wrapper">
               <table class="table table-hovered">
                   <thead class="thead-dark">
@@ -137,7 +138,7 @@
             </div>
           </div>
 
-          <div id="make-count" class="tabcontent">
+          <div id="make-count" class="tabcontent make-count">
             <div class="table-wrapper">
               <table class="table table-hovered">
                   <thead class="thead-dark">
@@ -152,7 +153,7 @@
             </div>
           </div>
 
-          <div id="type-count" class="tabcontent">
+          <div id="type-count" class="tabcontent type-count">
             <div class="table-wrapper">
               <table class="table table-hovered">
                   <thead class="thead-dark">
@@ -171,16 +172,15 @@
       </div>
     </div>
 <!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
-
   <div id="month-data" class="timeperiod">
     <div id="dataset">
       <div class="tab">
-        <button class="monthtablinks" onclick="openMonthTab(event, 'month-make-model-count')" id="MonthDefaultOpen">Model</button>
-        <button class="monthtablinks" onclick="openMonthTab(event, 'month-make-count')">Make</button>
-        <button class="monthtablinks" onclick="openMonthTab(event, 'month-type-count')">Type of Vehicle</button>
+        <button class="tablinks make-model-count-link" onclick="openDataTab(event, 'make-model-count')" id="MonthDefaultOpen">Model</button>
+        <button class="tablinks make-count-link" onclick="openDataTab(event, 'make-count')">Make</button>
+        <button class="tablinks type-count-link" onclick="openDataTab(event, 'type-count')">Type of Vehicle</button>
       </div>
       <div id="month-tables" class="tableset">
-        <div id="month-make-model-count" class="monthtabcontent">
+        <div id="month-make-model-count" class="tabcontent make-model-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -196,7 +196,7 @@
           </div>
         </div>
 
-        <div id="month-make-count" class="monthtabcontent">
+        <div id="month-make-count" class="tabcontent make-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -211,7 +211,7 @@
           </div>
         </div>
 
-        <div id="month-type-count" class="monthtabcontent">
+        <div id="month-type-count" class="tabcontent type-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -233,12 +233,12 @@
   <div id="all-time-data" class="timeperiod">
     <div id="dataset">
       <div class="tab">
-        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-make-model-count')" id="AllTimeDefaultOpen">Model</button>
-        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-make-count')">Make</button>
-        <button class="alltimetablinks" onclick="openAllTimeTab(event, 'all-time-type-count')">Type of Vehicle</button>
+        <button class="tablinks make-model-count-link" onclick="openDataTab(event, 'make-model-count')" id="AllTimeDefaultOpen">Model</button>
+        <button class="tablinks make-count-link" onclick="openDataTab(event, 'make-count')">Make</button>
+        <button class="tablinks type-count-link" onclick="openDataTab(event, 'type-count')">Type of Vehicle</button>
       </div>
       <div id="all-time-tables" class="tableset">
-        <div id="all-time-make-model-count" class="alltimetabcontent">
+        <div id="all-time-make-model-count" class="tabcontent make-model-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -254,7 +254,7 @@
           </div>
         </div>
 
-        <div id="all-time-make-count" class="alltimetabcontent">
+        <div id="all-time-make-count" class="tabcontent make-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -269,7 +269,7 @@
           </div>
         </div>
 
-        <div id="all-time-type-count" class="alltimetabcontent">
+        <div id="all-time-type-count" class="tabcontent type-count">
           <div class="table-wrapper">
             <table class="table table-hovered">
                 <thead class="thead-dark">
@@ -319,7 +319,7 @@
 
   //------------------------------------------------------------------------------------------------
 
-  function openWeekTab(evt, contentName) {
+  function openDataTab(evt, contentName) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -335,56 +335,20 @@
       tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
 
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(contentName).style.display = "block";
-    evt.currentTarget.className += " active";
-  }
+    // Show the current tab
+    var tabcontents = document.getElementsByClassName(contentName);
 
-  //------------------------------------------------------------------------------------------------
-
-  function openMonthTab(evt, contentName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("monthtabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
+    for(var i=0; i<tabcontents.length; i++) {
+      tabcontents[i].style.display = "block";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("monthtablinks");
+    //add the active class to relative buttons
+    tablinks = document.getElementsByClassName(contentName+"-link");
     for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
+      tablinks[i].className += " active";
     }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(contentName).style.display = "block";
-    evt.currentTarget.className += " active";
   }
 
-  //------------------------------------------------------------------------------------------------
-
-  function openAllTimeTab(evt, contentName) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("alltimetabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
-    }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("alltimetablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(contentName).style.display = "block";
-    evt.currentTarget.className += " active";
-  }
 </script>
 
 <!-- put the JSON data into the html tables -->
