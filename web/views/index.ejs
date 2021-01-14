@@ -9,6 +9,10 @@
 <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
 <script src="https://code.highcharts.com/mapdata/countries/nz/nz-all.js"></script>
 
+<!-- Data Tables library -->
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,8 +20,11 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Data Tables stylesheet -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css"/>
     <title>Vehicle Theft Tracker</title>
 </head>
+
 <style>
 
     .player-img {
@@ -291,12 +298,9 @@
 <!-- ---------------------------------------------------------------------------------------------------------------------------------------------- -->
   <div id="search-data" class="timeperiod">
         <div id="dataset">
-          <div class="tab">
-            <input type="text" id="data-search-input" onkeyup="searchData()" placeholder="Search for names..">
-          </div>
 
           <div class="table-wrapper">
-            <table class="table table-hovered">
+            <table id="data-search-table-table" class="table table-hovered">
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Reg.</th>
@@ -308,7 +312,7 @@
                         <th scope="col">Region</th>
                     </tr>
                 </thead>
-                <tbody id = data-search-table>
+                <tbody id=data-search-table>
                 </tbody>
             </table>
           </div>
@@ -412,9 +416,24 @@
     buildTypeTable(data,'all-time-type-count-table')
   });
 
-  $.getJSON('/last-1000.json', function(data){
-    buildDataSearchTable(data,'data-search-table')
-  });
+  $(document).ready( function () {
+    $('#data-search-table-table').DataTable({
+      autoWidth: false,
+      ajax: {
+        "url": '/last-1000.json',
+        "dataSrc": ''
+      },
+      columns: [
+        {data: 'rego'},
+        {data: 'make'},
+        {data: 'model'},
+        {data: 'year'},
+        {data: 'colour'},
+        {data: 'date'},
+        {data: 'location'},
+      ]
+    });
+  } );
 
 	function buildMakeModelTable(data,tableID){
 		var table = document.getElementById(tableID)
@@ -448,23 +467,6 @@
 			var row = `<tr>
 							<td>${data[i].type}</td>
 							<td>${data[i].magnitude}</td>
-					  </tr>`
-			table.innerHTML += row
-		}
-	}
-
-  function buildDataSearchTable(data,tableID){
-		var table = document.getElementById(tableID)
-
-		for (var i = 0; i < data.length; i++){
-			var row = `<tr>
-							<td>${data[i].rego}</td>
-							<td>${data[i].make}</td>
-              <td>${data[i].model}</td>
-							<td>${data[i].year}</td>
-              <td>${data[i].colour}</td>
-							<td>${data[i].date}</td>
-              <td>${data[i].location}</td>
 					  </tr>`
 			table.innerHTML += row
 		}
