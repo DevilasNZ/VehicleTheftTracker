@@ -23,42 +23,37 @@ except:
 
 #Main process loop
 while True:
-    #check when another download is due from the stolen vehicle dataset
-    #this should take place daily.
+    print("grabbing the stolen vehicle list...")
+    non_added_regos = []
+    added_records_count = 0
 
-    check_due = False
-    check_due_sql = "SELECT date FROM Vehicle_Theft_Tracker.vehicles WHERE date >= NOW() - INTERVAL 1 DAY"
     try:
-        cursor.execute(check_due_sql)
-        check_due_sql_result = cursor.fetchall()
-        if(len(check_due_sql_result) == 0): check_due = True#if no recent results show up, it must be due to check again.
+        raw_vehicle_data = requests.get("https://www.police.govt.nz/stolenwanted/vehicles/csv/download?tid=&all=true&gzip=false")
+        print("done.")
     except:
-        print("there was an issue with checking if data was due for an update for the search term " + term.search_name)
+        sys.exit("Failed to get the raw vehicle data. Has the URL changed, or is the website down?")
 
-    if check_due:
-        print("grabbing the stolen vehicle list...")
+    #process the csv.
+    print("processing data and writing to MySQL...")
+    vehicle_data_lines = raw_vehicle_data.text.split("\n")[0:-1]
+    vehicles = []
+
+    for line in vehicle_data_lines:
+        this_vehicle = Vehicle(line)
+        sql = "INSERT INTO `Vehicle_Theft_Tracker`.`vehicles`(`rego`,`colour`,`make`,`model`,`year`,`type`,`date`,`location`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+        vehicle_values = this_vehicle.get_sql_tuple()
+
         try:
-            raw_vehicle_data = requests.get("https://www.police.govt.nz/stolenwanted/vehicles/csv/download?tid=&all=true&gzip=false")
-            print("done.")
+            cursor.execute(sql,vehicle_values)
+            db.commit()
+            added_records_count += 1
         except:
-            sys.exit("Failed to get the raw vehicle data. Has the URL changed, or is the website down?")
+            non_added_regos.append(this_vehicle.rego)
 
-        #process the csv.
-        print("processing data and writing to MySQL...")
-        vehicle_data_lines = raw_vehicle_data.text.split("\n")[0:-1]
-        vehicles = []
-
-        for line in vehicle_data_lines:
-            this_vehicle = Vehicle(line)
-            sql = "INSERT INTO `Vehicle_Theft_Tracker`.`vehicles`(`rego`,`colour`,`make`,`model`,`year`,`type`,`date`,`location`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-            vehicle_values = this_vehicle.get_sql_tuple()
-
-            try:
-                cursor.execute(sql,vehicle_values)
-                db.commit()
-            except:
-                print("there was an issue writing a record to the SQL database with the rego " + this_vehicle.rego + ". Is it already in the database?")
     print("done")
-    print('Finished running grabber on {}'.format(datetime.datetime.now()),end='\n\n')
+    print('Finished running grabber on {}. A total of {} records were added'.format(datetime.datetime.now(),str(added_records_count)),end='\n\n')
+    print('errors occured on vehicles with these registration numbers (chances are they are already in the db): ' + str(non_added_regos),end='\n\n')
+
+    # run the tracker every 6 hours.
     print('tracker will run again in 6 hours.')
     time.sleep(21600)
