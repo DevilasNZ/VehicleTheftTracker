@@ -44,6 +44,7 @@
      overflow: hidden;
      border: 1px solid #ccc;
      background-color: #f1f1f1;
+     height: 54px;
     }
 
     /* Style the buttons that are used to open the tab content */
@@ -89,21 +90,31 @@
      border-top: none;
     }
 
-    .tableset{
+    .tableset {
       width: 50%;
       height: 400px;
       float: left;
     }
 
-    .tableset td{
+    .tableset td {
       font-size: 12px;
       padding: 6px;
     }
 
-    .mapcontainer{
+    .mapcontainer {
       margin-left: 52%;
       width: 48%;
       height: 400px;
+    }
+
+    /* Data Tables */
+    .dataTables_filter {
+      padding-top: 12px;
+      padding-left: 14px;
+    }
+
+    .dataTables_length {
+      padding-top: 5px;
     }
 </style>
 
@@ -299,6 +310,10 @@
   <div id="search-data" class="timeperiod">
         <div id="dataset">
 
+          <div class="tab">
+              <div id="newSearchPlace"></div>
+          </div>
+
           <div class="table-wrapper">
             <table id="data-search-table-table" class="table table-hovered">
                 <thead class="thead-dark">
@@ -416,6 +431,7 @@
     buildTypeTable(data,'all-time-type-count-table')
   });
 
+  // Generate the Data Table display for the last 1000 stolen vehicles
   $(document).ready( function () {
     $('#data-search-table-table').DataTable({
       autoWidth: false,
@@ -431,8 +447,11 @@
         {data: 'colour'},
         {data: 'date'},
         {data: 'location'},
-      ]
+      ],
+      order: [[ 5, "desc" ]]
     });
+
+    $("#newSearchPlace").html($(".dataTables_filter"));
   } );
 
 	function buildMakeModelTable(data,tableID){
