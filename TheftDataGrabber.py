@@ -1,19 +1,14 @@
-import requests,sys,mysql.connector,datetime,time
+import requests,sys,mysql.connector,datetime,time,os
 from vehicle import Vehicle
 
 print("starting theft data grabber...")
 
-#grab the password from the password file.
-password_file = open("/code/dbPassword.txt","r")
-db_password = password_file.readline()
-password_file.close()
-
 #establish a connection to the MySQL db.
 try:
     db = mysql.connector.connect(
-      host="192.168.1.176",
-      user='vehicle_theft_tracker',
-      password=db_password
+      host=os.getenv('DB_HOST'),
+      user=os.getenv('DB_USER'),
+      password=os.getenv('DB_PASSWORD')
     )
 
     cursor = db.cursor()
