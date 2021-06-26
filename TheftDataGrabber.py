@@ -14,7 +14,8 @@ try:
     cursor = db.cursor()
     print("successfully connected to the MySQL database.")
 except:
-    sys.exit("There was an error connecting to the Theft Tracker DB. Is the SQL server running?")
+    print("There was an error connecting to the Theft Tracker DB. Is the SQL server running?")
+    sys.exit(0)
 
 #Main process loop
 while True:
@@ -26,7 +27,8 @@ while True:
         raw_vehicle_data = requests.get("https://www.police.govt.nz/stolenwanted/vehicles/csv/download?tid=&all=true&gzip=false")
         print("done.")
     except:
-        sys.exit("Failed to get the raw vehicle data. Has the URL changed, or is the website down?")
+        print("Failed to get the raw vehicle data. Has the URL changed, or is the website down?")
+        sys.exit(0)
 
     #process the csv.
     print("processing data and writing to MySQL...")
