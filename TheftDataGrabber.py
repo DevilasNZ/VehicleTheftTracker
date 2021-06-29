@@ -12,6 +12,7 @@ try:
     )
 
     cursor = db.cursor()
+    schema = os.getenv('DB_SCHEMA')
     print("successfully connected to the MySQL database.")
 except:
     print("There was an error connecting to the Theft Tracker DB. Is the SQL server running?")
@@ -37,7 +38,7 @@ while True:
 
     for line in vehicle_data_lines:
         this_vehicle = Vehicle(line)
-        sql = "INSERT INTO `Vehicle_Theft_Tracker`.`vehicles`(`rego`,`colour`,`make`,`model`,`year`,`type`,`date`,`location`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+        sql = "INSERT INTO `" + schema + "`.`vehicles`(`rego`,`colour`,`make`,`model`,`year`,`type`,`date`,`location`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
         vehicle_values = this_vehicle.get_sql_tuple()
 
         try:
