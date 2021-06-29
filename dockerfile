@@ -6,4 +6,5 @@ RUN pip install mysql-connector-python requests
 
 #Clone and run the code
 RUN git clone https://github.com/DevilasNZ/VehicleTheftTracker
-RUN python3 /VehicleTheftTracker/TheftDataGrabber.py
+
+CMD ["python3","-u","/VehicleTheftTracker/TheftDataGrabber.py"]
